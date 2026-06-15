@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Dashboard — CampusBridge</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9ff; }
+        nav {
+            background: white; padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #667eea, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #f093fb); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; }
+        .logout { color: #f5576c; font-size: 13px; cursor: pointer; text-decoration: none; font-weight: 600; }
+        .header { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; padding: 40px 32px; }
+        .header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+        .header p  { opacity: 0.9; font-size: 15px; }
+        
+        /* POINTS WALLET CSS */
+        .wallet-container {
+            max-width: 900px; margin: -20px auto 20px auto; padding: 0 32px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;
+            position: relative; z-index: 10;
+        }
+        .wallet-card {
+            background: white; border-radius: 16px; padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1); text-align: center;
+        }
+        .wallet-card h3 { color: #888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;}
+        .wallet-card .value { font-size: 32px; font-weight: 800; color: #f093fb; }
+        .wallet-card .sub { font-size: 13px; color: #aaa; margin-top: 4px;}
+
+        .tabs-nav { background: white; padding: 0 32px; display: flex; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .tab-btn { padding: 16px 24px; cursor: pointer; font-weight: 600; font-size: 14px; color: #888; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .tab-btn.active { color: #f093fb; border-bottom-color: #f093fb; }
+        .content { padding: 32px; max-width: 900px; margin: 0 auto; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* FORM */
+        .form-card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); margin-bottom: 24px; }
+        .form-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #333; }
+        label { display: block; font-weight: 600; font-size: 13px; color: #555; margin-bottom: 6px; }
+        input, select, textarea { width: 100%; padding: 11px 14px; border: 2px solid #e8e8e8; border-radius: 10px; font-size: 14px; margin-bottom: 16px; outline: none; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: #f093fb; }
+        textarea { height: 90px; resize: vertical; }
+        .row { display: flex; gap: 12px; }
+        .row > div { flex: 1; }
+        .btn-grad { padding: 12px 28px; border-radius: 10px; border: none; background: linear-gradient(135deg, #f093fb, #f5576c); color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .msg { padding: 12px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 12px; display: none; text-align: center; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+        .error   { background: #ffebee; color: #c62828; }
+
+        /* BOOKINGS */
+        .booking-card { background: white; border-radius: 14px; padding: 20px 24px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .booking-info h4 { font-weight: 700; margin-bottom: 4px; }
+        .booking-info p  { font-size: 13px; color: #888; }
+        .badge { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .confirmed { background: #e8f5e9; color: #2e7d32; }
+        .pending   { background: #fff8e1; color: #f57f17; }
+        .cancelled { background: #ffebee; color: #c62828; }
+
+        /* SLOTS */
+        .slot-item { background: white; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .slot-item .info .date { font-weight: 700; }
+        .slot-item .info .time { font-size: 13px; color: #888; }
+        .slot-status { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+        .free   { background: #e8f5e9; color: #2e7d32; }
+        .booked { background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">🎓 CampusBridge</div>
+    <div class="user-info">
+        <div class="avatar" id="navAvatar">?</div>
+        <span style="font-weight:600;font-size:14px" id="navName"></span>
+        <a class="logout" href="auth.html" onclick="sessionStorage.clear()">Log Out</a>
+    </div>
+</nav>
+
+<div class="header">
+    <h1>Mentor Dashboard 👨‍🏫</h1>
+    <p>Manage your profile, availability, and bookings.</p>
+</div>
+
+<div class="wallet-container" id="walletContainer" style="display: none;">
+    <div class="wallet-card">
+        <h3>Total Points</h3>
+        <div class="value" id="totalPoints">0</div>
+        <div class="sub">Lifetime points earned</div>
+    </div>
+    <div class="wallet-card">
+        <h3>Estimated Earnings</h3>
+        <div class="value" style="color: #2e7d32;" id="cashValue">$0</div>
+        <div class="sub" id="tierStatus">Status: Base Tier ($10/pt)</div>
+    </div>
+    <div class="wallet-card">
+        <h3>Active Streak</h3>
+        <div class="value" style="color: #f57f17;" id="streakBonus">0</div>
+        <div class="sub">Complete sessions to level up</div>
+    </div>
+</div>
+
+<div class="tabs-nav">
+    <div class="tab-btn active" onclick="switchTab('profile')">👤 My Profile</div>
+    <div class="tab-btn" onclick="switchTab('slots')">📅 My Slots</div>
+    <div class="tab-btn" onclick="switchTab('bookings')">📋 My Bookings</div>
+</div>
+
+<div class="content">
+    <div class="tab-panel active" id="profileTab">
+        <div class="form-card">
+            <h3>Create Your Mentor Profile</h3>
+            <label>University</label>
+            <select id="uniSelect"></select>
+            <label>Degree Name</label>
+            <input type="text" id="degreeName" placeholder="e.g. B.Tech Computer Science" />
+            <div class="row">
+                <div>
+                    <label>Graduation Year</label>
+                    <input type="number" id="gradYear" placeholder="2023" min="1900" max="2100" />
+                </div>
+            </div>
+            
+            <label>Virtual Meeting Link (Zoom, Meet, Teams)</label>
+            <input type="url" id="meetingLink" placeholder="e.g. https://meet.google.com/abc-defg-hij" />
+            
+            <label>Bio</label>
+            <textarea id="bio" placeholder="Tell mentees about yourself..."></textarea>
+            
+            <button class="btn-grad" onclick="saveProfile()">Save Profile →</button>
+            <div class="msg" id="profileMsg"></div>
+        </div>
+    </div>
+
+    <div class="tab-panel" id="slotsTab">
+        <div class="form-card">
+            <h3>Add New Availability Slot</h3>
+            <div class="row">
+                <div>
+                    <label>Date</label>
+                    <input type="date" id="slotDate" />
+                </div>
+                <div>
+                    <label>Start Time</label>
+                    <input type="time" id="startTime" />
+                </div>
+                <div>
+                    <label>End Time</label>
+                    <input type="time" id="endTime" />
+                </div>
+            </div>
+            <button class="btn-grad" onclick="addSlot()">Add Slot →</button>
+            <div class="msg" id="slotMsg"></div>
+        </div>
+        <div id="mySlotsList"></div>
+    </div>
+
+    <div class="tab-panel" id="bookingsTab">
+        <div id="mentorBookingsList"><p style="text-align:center;padding:40px;color:#aaa">Loading...</p></div>
+    </div>
+</div>
+
+<script>
+    const userId   = sessionStorage.getItem('user_id');
+    const userName = sessionStorage.getItem('user_name');
+    const userRole = sessionStorage.getItem('user_role');
+
+    if (!userId || userRole !== 'mentor') window.location.href = 'auth.html';
+
+    document.getElementById('navName').textContent   = userName;
+    document.getElementById('navAvatar').textContent = userName ? userName[0].toUpperCase() : '?';
+
+    let mentorId = null;
+
+    // Load universities into dropdown
+    fetch('/api/universities').then(r => r.json()).then(unis => {
+        const sel = document.getElementById('uniSelect');
+        unis.forEach(u => {
+            sel.innerHTML += `<option value="${u.Uni_ID}">${u.Uni_Name}, ${u.City}</option>`;
+        });
+    });
+
+    // Check if mentor profile exists
+    fetch(`/api/mentor-profile/${userId}`).then(r => r.json()).then(profile => {
+        if (profile) {
+            mentorId = profile.Mentor_ID;
+            document.getElementById('degreeName').value = profile.Degree_Name;
+            document.getElementById('gradYear').value   = profile.Grad_Year;
+            document.getElementById('bio').value        = profile.Bio || '';
+            document.getElementById('meetingLink').value = profile.Meeting_Link || '';
+            
+            document.getElementById('walletContainer').style.display = 'grid';
+            loadPoints();
+        }
+    });
+
+    function loadPoints() {
+        if (!mentorId) return;
+        fetch(`/api/points/${mentorId}`)
+            .then(r => r.json())
+            .then(points => {
+                const totalPoints = points.Total_Points || 0;
+                const currentStreak = points.Current_Streak || 0;
+                
+                let pointValue = 10; 
+                let currentTier = "Base Tier";
+                let nextGoal = 10 - currentStreak;
+
+                if (currentStreak >= 20) {
+                    pointValue = 20; 
+                    currentTier = "Platinum Tier (2.0x)";
+                    nextGoal = "MAX";
+                } else if (currentStreak >= 10) {
+                    pointValue = 15; 
+                    currentTier = "Gold Tier (1.5x)";
+                    nextGoal = 20 - currentStreak;
+                }
+
+                const cashVal = totalPoints * pointValue;
+                
+                document.getElementById('totalPoints').textContent = totalPoints;
+                document.getElementById('cashValue').textContent = `$${cashVal}`;
+                document.getElementById('tierStatus').textContent = `Status: ${currentTier} ($${pointValue}/pt)`;
+                
+                const streakElement = document.getElementById('streakBonus');
+                if (nextGoal === "MAX") {
+                    streakElement.innerHTML = `${currentStreak} 🔥<br><span style="font-size:11px; color:#aaa;">Max Tier Unlocked!</span>`;
+                } else {
+                    streakElement.innerHTML = `${currentStreak} 🔥<br><span style="font-size:11px; color:#aaa;">${nextGoal} sessions to next tier</span>`;
+                }
+            })
+            .catch(err => console.error("Could not fetch points:", err));
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tab + 'Tab').classList.add('active');
+        event.target.classList.add('active');
+        if (tab === 'slots')    loadMySlots();
+        if (tab === 'bookings') loadMentorBookings();
+    }
+
+    function showMsg(id, text, type) {
+        const el = document.getElementById(id);
+        el.textContent = text; el.className = 'msg ' + type; el.style.display = 'block';
+    }
+
+    function saveProfile() {
+        const body = {
+            user_id     : userId,
+            uni_id      : document.getElementById('uniSelect').value,
+            degree_name : document.getElementById('degreeName').value,
+            grad_year   : document.getElementById('gradYear').value,
+            bio         : document.getElementById('bio').value,
+            meeting_link: document.getElementById('meetingLink').value 
+        };
+        fetch('/api/mentor-profile', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                mentorId = data.mentor_id;
+                showMsg('profileMsg', '✅ Profile saved successfully!', 'success');
+                document.getElementById('walletContainer').style.display = 'grid';
+                loadPoints();
+            } else {
+                showMsg('profileMsg', '❌ ' + data.error, 'error');
+            }
+        });
+    }
+
+    function addSlot() {
+        if (!mentorId) return showMsg('slotMsg', '❌ Please save your profile first.', 'error');
+        const body = {
+            mentor_id  : mentorId,
+            slot_date  : document.getElementById('slotDate').value,
+            start_time : document.getElementById('startTime').value,
+            end_time   : document.getElementById('endTime').value
+        };
+        if (!body.slot_date || !body.start_time || !body.end_time)
+            return showMsg('slotMsg', '❌ Please fill all slot fields.', 'error');
+
+        fetch('/api/slots', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showMsg('slotMsg', '✅ Slot added!', 'success');
+                loadMySlots();
+            } else {
+                showMsg('slotMsg', '❌ ' + data.error, 'error');
+            }
+        });
+    }
+
+    function loadMySlots() {
+        if (!mentorId) return;
+        fetch(`/api/slots/${mentorId}`).then(r => r.json()).then(slots => {
+            const list = document.getElementById('mySlotsList');
+            if (slots.length === 0) {
+                list.innerHTML = '<p style="text-align:center;padding:20px;color:#aaa">No slots yet. Add one above.</p>';
+                return;
+            }
+            list.innerHTML = '';
+            slots.forEach(s => {
+                // Ensure date formatting looks nice
+                const niceDate = new Date(s.Slot_Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                list.innerHTML += `
+                    <div class="slot-item">
+                        <div class="info">
+                            <div class="date">📅 ${niceDate}</div>
+                            <div class="time">🕐 ${s.Start_Time} — ${s.End_Time}</div>
+                        </div>
+                        <span class="slot-status free">Available</span>
+                    </div>
+                `;
+            });
+        });
+    }
+
+function loadMentorBookings() {
+    if (!mentorId) {
+        document.getElementById('mentorBookingsList').innerHTML = 
+            '<p style="text-align:center;padding:40px;color:#aaa">Save your profile first to see bookings.</p>';
+        return;
+    }
+    fetch(`/api/mentor-bookings/${mentorId}`)
+        .then(r => r.json())
+        .then(bookings => {
+            const list = document.getElementById('mentorBookingsList');
+            if (bookings.length === 0) {
+                list.innerHTML = '<p style="text-align:center;padding:40px;color:#aaa">No bookings yet.</p>';
+                return;
+            }
+            list.innerHTML = '';
+            bookings.forEach(b => {
+                // --- NEW: TIME-LOCKED LOGIC FOR ACTIONS ---
+                let actions = '';
+                if (b.Status === 'pending') {
+                    const now = new Date();
+                    // Fix potential timezone offset issues by splitting the ISO string
+                    const dateString = b.Slot_Date.split('T')[0];
+                    const meetingEnd = new Date(`${dateString}T${b.End_Time}`);
+
+                    if (now > meetingEnd) {
+                        // The meeting is over, mentor can now claim points
+                        actions = `
+                            <div style="display:flex;gap:8px">
+                                <button onclick="completeSession(${b.Booking_ID}, this)"
+                                    style="padding:8px 16px;border-radius:8px;border:none;
+                                           background:linear-gradient(135deg,#667eea,#f093fb);
+                                           color:white;font-weight:700;font-size:13px;cursor:pointer">
+                                    ✅ Confirm & Claim Points
+                                </button>
+                                <button onclick="updateStatus(${b.Booking_ID}, 'cancelled', this)"
+                                    style="padding:8px 16px;border-radius:8px;border:none;
+                                           background:#ffebee;color:#c62828;
+                                           font-weight:700;font-size:13px;cursor:pointer">
+                                    ✖ Cancel
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        // It's too early to confirm
+                        actions = `
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <span style="font-size:11px; color:#aaa; font-weight:bold; background:#f0f0f0; padding:8px 12px; border-radius:8px;">
+                                    ⏳ Confirms after session
+                                </span>
+                                <button onclick="updateStatus(${b.Booking_ID}, 'cancelled', this)"
+                                    style="padding:8px 16px;border-radius:8px;border:none;
+                                           background:#ffebee;color:#c62828;
+                                           font-weight:700;font-size:13px;cursor:pointer">
+                                    ✖ Cancel
+                                </button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    // Already confirmed or cancelled
+                    actions = `<span class="badge ${b.Status}">${b.Status}</span>`;
+                }
+
+                // --- REVIEW DISPLAY LOGIC ---
+                let reviewHTML = '';
+                if (b.Rating) {
+                    reviewHTML = `
+                        <div style="margin-top: 12px; padding: 12px; background: #fff0f6; border-radius: 8px; font-size: 13px; color: #d81b60; border: 1px solid #f8bbd0;">
+                            <strong style="display:block; margin-bottom:4px;">⭐ Rated ${b.Rating} out of 5 Stars</strong>
+                            ${b.Review_Comment ? `<span style="color:#666;">"${b.Review_Comment}"</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                const niceDate = new Date(b.Slot_Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+                list.innerHTML += `
+                    <div class="booking-card" id="booking-${b.Booking_ID}">
+                        <div class="booking-info" style="flex:1;">
+                            <h4>Session with ${b.Mentee_Name}</h4>
+                            <p>🌍 ${b.Country} &nbsp;|&nbsp; 
+                               📅 ${niceDate} &nbsp;|&nbsp; 
+                               🕐 ${b.Start_Time} — ${b.End_Time}</p>
+                            ${reviewHTML}
+                        </div>
+                        <div id="status-${b.Booking_ID}">
+                            ${actions}
+                        </div>
+                    </div>
+                `;
+            });
+        });
+}
+
+    function completeSession(bookingId, btn) {
+        if(!confirm("Did this session successfully finish? Clicking OK will finalize the session and award your points!")) return;
+        
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        fetch('/api/complete-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ booking_id: bookingId })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const statusDiv = document.getElementById(`status-${bookingId}`);
+                statusDiv.innerHTML = `<span class="badge confirmed">confirmed</span>`;
+                loadPoints();
+            } else {
+                alert("Error: " + data.error);
+                btn.disabled = false;
+                btn.textContent = '✅ Confirm & Claim Points';
+            }
+        })
+        .catch(err => {
+            alert("Something went wrong with the server.");
+            btn.disabled = false;
+            btn.textContent = '✅ Confirm & Claim Points';
+        });
+    }
+
+    function updateStatus(bookingId, status, btn) {
+        btn.disabled    = true;
+        btn.textContent = 'Saving...';
+
+        fetch('/api/booking-status', {
+            method  : 'PUT',
+            headers : { 'Content-Type': 'application/json' },
+            body    : JSON.stringify({ booking_id: bookingId, status: status })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const statusDiv = document.getElementById(`status-${bookingId}`);
+                statusDiv.innerHTML = `<span class="badge ${status}">${status}</span>`;
+            }
+        });
+    }
+</script>
+</body>
+</html>

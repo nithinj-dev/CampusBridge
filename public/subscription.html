@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusBridge - Subscriptions</title>
+    <style>
+        :root {
+    --primary-color: #667eea;
+    --primary-hover: #5a6cd6;
+    --bg-color: #f8f9ff; /* Matching your landing page background */
+    --text-main: #333333;
+    --text-muted: #888888;
+    --card-bg: #ffffff;
+    --border-color: #e5e7eb;
+}
+
+/* You can also update the Pro card border to use your gradient */
+.card.pro {
+    border: 2px solid transparent;
+    background-image: linear-gradient(white, white), linear-gradient(135deg, #667eea, #f093fb);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+/* And update the Pro button and badge to use the gradient */
+.btn-primary, .badge {
+    background: linear-gradient(135deg, #667eea, #f093fb);
+    color: white;
+    border: none;
+}
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        header nav a {
+            text-decoration: none;
+            color: var(--text-main);
+            margin-left: 1.5rem;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .header-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-text p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        .pricing-cards {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        .badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+            text-align: left;
+            flex-grow: 1;
+        }
+
+        .features li {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+        }
+
+        .features li::before {
+            content: "✓";
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-muted);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            bottom: 30px;
+            font-size: 1rem;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CampusBridge</h1>
+        <nav>
+            <a href="/mentee.html">Dashboard</a>
+            <a href="/mentors.html">Find Mentors</a>
+            <a href="/subscription.html">Subscription</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="header-text">
+            <h2>Unlock Your Full Potential</h2>
+            <p>Upgrade to Pro to get unlimited access to top university mentors around the globe.</p>
+        </div>
+
+        <div class="pricing-cards">
+            <!-- Free Plan -->
+            <div class="card">
+                <h3>Free Plan</h3>
+                <div class="price">$0<span> / month</span></div>
+                <ul class="features">
+                    <li>Access to mentor profiles</li>
+                    <li>Up to 3 lifetime mentor bookings</li>
+                    <li>Standard community support</li>
+                </ul>
+                <button id="freeBtn" class="btn-outline" disabled>Current Plan</button>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="card pro">
+                <div class="badge">MOST POPULAR</div>
+                <h3>Pro Plan</h3>
+                <div class="price">$15<span> / month</span></div>
+                <ul class="features">
+                    <li>Unlimited mentor bookings</li>
+                    <li>Priority meeting slot access</li>
+                    <li>Cancel anytime</li>
+                </ul>
+                <!-- The ID here connects to the JS below -->
+                <button class="btn-primary" id="upgradeBtn" onclick="upgradeToPro()">Upgrade to Pro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast message container -->
+    <div id="toast">Processing upgrade...</div>
+
+    <script>
+        const loggedInUserId = sessionStorage.getItem('user_id');
+
+// Function: Check their plan when the page loads
+async function checkCurrentPlan() {
+    if (!loggedInUserId) return;
+
+    try {
+        const response = await fetch(`/api/subscriptions/${loggedInUserId}`);
+        const data = await response.json();
+
+        const proBtn = document.getElementById('upgradeBtn');
+        const freeBtn = document.getElementById('freeBtn');
+
+        if (data.Plan === 'pro' && data.Is_Active === 1) {
+            // --- USER IS PRO ---
+            // Update Pro Button
+            proBtn.textContent = "Current Plan 🚀";
+            proBtn.classList.remove('btn-fill', 'btn-primary');
+            proBtn.classList.add('btn-outline');
+            proBtn.disabled = true;
+
+            // Update Free Button
+            freeBtn.textContent = "Basic Tier"; 
+            freeBtn.disabled = true; 
+        } else {
+            // --- USER IS FREE ---
+            freeBtn.textContent = "Current Plan";
+            freeBtn.disabled = true;
+
+            proBtn.textContent = "Upgrade to Pro";
+            proBtn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Could not fetch current plan:", error);
+    }
+}
+
+// Function: Handle the subscription upgrade
+async function upgradeToPro() {
+    const proBtn = document.getElementById('upgradeBtn');
+    
+    if (!loggedInUserId) {
+        showToast("Please log in to upgrade.");
+        return;
+    }
+
+    proBtn.textContent = "Processing...";
+    proBtn.disabled = true;
+
+    try {
+        const response = await fetch('/api/subscriptions/upgrade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mentee_id: loggedInUserId }) 
+        });
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("text/html") !== -1) {
+            throw new Error("Server returned HTML. Check your server console for crash logs.");
+        }
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to upgrade');
+
+        showToast("Successfully upgraded to Pro! 🚀");
+        
+        // Re-run the check to automatically update both buttons!
+        checkCurrentPlan(); 
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showToast(error.message || "Failed to upgrade. Please try again.");
+        proBtn.textContent = "Upgrade to Pro";
+        proBtn.disabled = false;
+    }
+}
+
+// Run the check immediately when the script loads
+checkCurrentPlan();
+//         // 1. Get the user ID right away
+// const loggedInUserId = sessionStorage.getItem('user_id');
+
+// // 2. NEW FUNCTION: Check their plan when the page loads
+// async function checkCurrentPlan() {
+//     if (!loggedInUserId) return; // If not logged in, do nothing
+
+//     try {
+//         const response = await fetch(`/api/subscriptions/${loggedInUserId}`);
+//         const data = await response.json();
+
+//         // If the database says they are Pro, update the UI so they can't buy it again!
+//         if (data.Plan === 'pro' && data.Is_Active === 1) {
+//             const btn = document.getElementById('upgradeBtn');
+//             btn.textContent = "Active Pro Member 🚀";
+            
+//             // Remove the solid background class and make it outlined/disabled
+//             btn.classList.remove('btn-fill', 'btn-primary');
+//             btn.classList.add('btn-outline');
+//             btn.disabled = true;
+//         }
+//     } catch (error) {
+//         console.error("Could not fetch current plan:", error);
+//     }
+// }
+
+// // 3. Run the check immediately when the script loads
+// checkCurrentPlan();
+
+// // ... (Your existing upgradeToPro() function stays down here) ...
+//         // Function to handle the subscription upgrade
+// // Function to handle the subscription upgrade
+// async function upgradeToPro() {
+//     const btn = document.getElementById('upgradeBtn');
+//     const toast = document.getElementById('toast');
+    
+//     // FIXED: Now we look in sessionStorage, exactly like mentee.html does!
+//     const loggedInUserId = sessionStorage.getItem('user_id');
+    
+//     if (!loggedInUserId) {
+//         showToast("Please log in to upgrade.");
+//         return;
+//     }
+
+//     // UI Feedback
+//     btn.textContent = "Processing...";
+//     btn.disabled = true;
+
+//     try {
+//         const response = await fetch('/api/subscriptions/upgrade', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             // We pass the loggedInUserId directly now
+//             body: JSON.stringify({ mentee_id: loggedInUserId }) 
+//         });
+
+//         const data = await response.json();
+
+//         if (!response.ok) {
+//             throw new Error(data.error || 'Failed to upgrade');
+//         }
+
+//         // Success UI update
+//         showToast("Successfully upgraded to Pro! 🚀");
+//         btn.textContent = "Active Pro Member";
+//         btn.classList.remove('btn-fill');
+//         btn.classList.add('btn-outline');
+        
+//     } catch (error) {
+//         console.error('Error:', error);
+//         showToast(error.message || "Failed to upgrade. Please try again.");
+//         btn.textContent = "Upgrade to Pro";
+//         btn.disabled = false;
+//     }
+// }
+// Helper function for toast notifications
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = "show";
+    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+}
+    </script>
+</body>
+</html>

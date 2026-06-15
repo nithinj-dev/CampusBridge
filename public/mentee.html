@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentee Dashboard — CampusBridge</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9ff; }
+
+        nav {
+            background: white; padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #667eea, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 16px;
+        }
+        .user-name { font-weight: 600; font-size: 14px; }
+        .logout { color: #f5576c; font-size: 13px; cursor: pointer; text-decoration: none; font-weight: 600; }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            color: white; padding: 40px 32px;
+        }
+        .header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+        .header p  { opacity: 0.9; font-size: 15px; }
+
+        .tabs-nav {
+            background: white; padding: 0 32px;
+            display: flex; gap: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .tab-btn {
+            padding: 16px 24px; cursor: pointer; font-weight: 600;
+            font-size: 14px; color: #888; border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-btn.active { color: #667eea; border-bottom-color: #667eea; }
+
+        .content { padding: 32px; max-width: 1100px; margin: 0 auto; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* PREMIUM LINKEDIN-STYLE MENTOR CARDS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; align-items: start; }
+        .card {
+            background: white; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: box-shadow 0.3s ease, transform 0.3s ease;
+            position: relative;
+        }
+        .card:hover { 
+            box-shadow: 0 12px 28px rgba(102,126,234,0.15); 
+            transform: translateY(-4px);
+        }
+        
+        /* Top Banner & Avatar */
+        .card-cover { 
+            height: 80px; 
+            background: linear-gradient(135deg, #667eea, #f093fb); 
+            opacity: 0.9;
+        }
+        .card-content { padding: 0 24px 24px; position: relative; }
+        .card-avatar {
+            width: 80px; height: 80px; border-radius: 50%; border: 4px solid white;
+            background: #2d3748; color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 800; margin-top: -40px; margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* Always Visible Details */
+        .card-name { font-size: 18px; font-weight: 800; color: #1a202c; margin-bottom: 4px; }
+        .card-headline { font-size: 13px; color: #4a5568; font-weight: 600; line-height: 1.4; }
+        .card-location { font-size: 12px; color: #a0aec0; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+        
+        .card-stats { 
+            display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; 
+            border-top: 1px solid #edf2f7; align-items: center;
+        }
+        .stat-badge { 
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; 
+        }
+        .stat-rating { background: #fff0f6; color: #d81b60; }
+        .stat-year { background: #ebf4ff; color: #4c51bf; }
+
+        /* The Magic Hover Reveal Section */
+        .card-hover-reveal {
+            max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease;
+        }
+        .card:hover .card-hover-reveal {
+            max-height: 400px; opacity: 1; margin-top: 16px;
+        }
+        .card-bio { 
+            font-size: 13px; color: #4a5568; line-height: 1.6; font-style: italic;
+            background: #f7fafc; padding: 12px; border-radius: 8px; border-left: 3px solid #667eea;
+            margin-bottom: 16px;
+        }
+        .book-btn {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            color: white; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;
+        }
+        .book-btn:hover { opacity: 0.9; box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+
+        /* SLOTS MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center; z-index: 999;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: white; border-radius: 20px; padding: 32px;
+            width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto;
+        }
+        .modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+        .slot-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 16px; border-radius: 10px; background: #f8f9ff;
+            margin-bottom: 10px;
+        }
+        .slot-item .date { font-weight: 700; font-size: 14px; }
+        .slot-item .time { font-size: 13px; color: #888; margin-top: 2px; }
+        .slot-btn {
+            padding: 8px 20px; border-radius: 8px; border: none;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            color: white; font-weight: 600; font-size: 13px; cursor: pointer;
+        }
+        .close-btn {
+            width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #e8e8e8;
+            background: white; font-weight: 600; cursor: pointer; margin-top: 12px; color: #888;
+        }
+        .modal-msg {
+            padding: 12px; border-radius: 8px; text-align: center;
+            font-weight: 600; font-size: 14px; margin-bottom: 12px; display: none;
+        }
+
+        /* BOOKINGS TABLE */
+        .booking-card {
+            background: white; border-radius: 14px; padding: 20px 24px;
+            margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px;
+        }
+        .booking-info h4 { font-weight: 700; margin-bottom: 4px; }
+        .booking-info p  { font-size: 13px; color: #888; }
+        .badge {
+            padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
+        }
+        .confirmed { background: #e8f5e9; color: #2e7d32; }
+        .pending   { background: #fff8e1; color: #f57f17; }
+        .cancelled { background: #ffebee; color: #c62828; }
+        #loading { text-align: center; padding: 40px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">🎓 CampusBridge</div>
+    <div class="user-info">
+        <a href="subscription.html" style="text-decoration:none; font-weight:700; color:#667eea; background:white; padding:6px 16px; border-radius:20px; font-size:13px; border:2px solid #667eea; transition: 0.2s;">Upgrade to Pro 🚀</a>
+        
+        <div class="avatar" id="navAvatar">?</div>
+        <div class="user-name" id="navName">Loading...</div>
+        <a class="logout" href="auth.html" onclick="sessionStorage.clear()">Log Out</a>
+    </div>
+</nav>
+
+<div class="header">
+    <h1>Welcome back, <span id="headerName">there</span>! 👋</h1>
+    <p>Find a mentor and book your next session below.</p>
+</div>
+
+<div class="tabs-nav">
+    <div class="tab-btn active" onclick="switchTab('browse')">🔍 Browse Mentors</div>
+    <div class="tab-btn" onclick="switchTab('bookings')">📅 My Bookings</div>
+</div>
+
+<div class="content">
+    <div class="tab-panel active" id="browseTab">
+        
+        <div style="display:flex; gap:16px; margin-bottom:24px; background:white; padding:16px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); flex-wrap:wrap;">
+            <div style="flex:1; min-width:200px;">
+                <label style="font-size:12px; font-weight:bold; color:#888; display:block; margin-bottom:6px;">Filter by Country</label>
+                <input type="text" id="filterCountry" placeholder="e.g. India, USA, UK" style="width:100%; padding:10px; border-radius:8px; border:2px solid #e8e8e8; outline:none;" />
+            </div>
+            <div style="flex:1; min-width:200px;">
+                <label style="font-size:12px; font-weight:bold; color:#888; display:block; margin-bottom:6px;">Filter by University</label>
+                <select id="filterUni" style="width:100%; padding:10px; border-radius:8px; border:2px solid #e8e8e8; outline:none; font-family:inherit;">
+                    <option value="">All Universities</option>
+                </select>
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+                <button onclick="loadMentors()" style="padding:10px 24px; border-radius:8px; border:none; background:linear-gradient(135deg, #667eea, #f093fb); color:white; font-weight:bold; cursor:pointer;">
+                    Apply Filters 🔍
+                </button>
+            </div>
+        </div>
+
+        <div id="loading">Loading mentors...</div>
+        <div class="grid" id="mentorGrid"></div>
+    </div>
+
+    <div class="tab-panel" id="bookingsTab">
+        <div id="myBookingsList"><p style="text-align:center;padding:40px;color:#aaa">Loading your bookings...</p></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3 id="modalTitle">Available Slots</h3>
+        <div class="modal-msg" id="modalMsg"></div>
+        <div id="slotsList"></div>
+        <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<script>
+    const userId   = sessionStorage.getItem('user_id');
+    const userName = sessionStorage.getItem('user_name');
+    const userRole = sessionStorage.getItem('user_role');
+
+    if (!userId || userRole !== 'mentee') window.location.href = 'auth.html';
+
+    document.getElementById('navName').textContent    = userName;
+    document.getElementById('navAvatar').textContent  = userName ? userName[0].toUpperCase() : '?';
+    document.getElementById('headerName').textContent = userName ? userName.split(' ')[0] : 'there';
+
+    let currentMentorId = null;
+
+    // Load universities into the filter dropdown
+    fetch('/api/universities').then(r => r.json()).then(unis => {
+        const sel = document.getElementById('filterUni');
+        unis.forEach(u => {
+            sel.innerHTML += `<option value="${u.Uni_ID}">${u.Uni_Name}, ${u.City}</option>`;
+        });
+    });
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tab + 'Tab').classList.add('active');
+        event.target.classList.add('active');
+        if (tab === 'bookings') loadMyBookings();
+        if (tab === 'browse') loadMentors(); // Refresh stars if they just left a review!
+    }
+
+    function loadMentors() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('mentorGrid').innerHTML = '';
+        
+        // Grab the values from our new filter inputs
+        const country = document.getElementById('filterCountry').value.trim();
+        const uniId = document.getElementById('filterUni').value;
+
+        // Build the URL with query parameters
+        let url = '/api/mentors?';
+        if (country) url += `country=${encodeURIComponent(country)}&`;
+        if (uniId) url += `uni_id=${uniId}`;
+        
+        fetch(url)
+            .then(r => r.json())
+            .then(mentors => {
+                document.getElementById('loading').style.display = 'none';
+                const grid = document.getElementById('mentorGrid');
+                
+                if (mentors.length === 0) {
+                    grid.innerHTML = '<p style="color:#aaa; grid-column: 1 / -1; text-align:center;">No mentors found matching your filters.</p>';
+                    return;
+                }
+
+                mentors.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    // NEW: Premium LinkedIn-Style Layout using existing data!
+                    card.innerHTML = `
+                        <div class="card-cover"></div>
+                        <div class="card-content">
+                            <div class="card-avatar">${m.Fname[0]}</div>
+                            
+                            <div class="card-name">${m.Fname} ${m.Lname}</div>
+                            <div class="card-headline">📚 ${m.Degree_Name} at ${m.Uni_Name}</div>
+                            <div class="card-location">📍 ${m.City}, ${m.Country}</div>
+                            
+                            <div class="card-stats">
+                                <span class="stat-badge stat-rating">⭐ ${m.Avg_Rating || 'New'} (${m.Review_Count || 0})</span>
+                                <span class="stat-badge stat-year">🎓 Class of ${m.Grad_Year}</span>
+                            </div>
+                            
+                            <div class="card-hover-reveal">
+                                <div class="card-bio">"${m.Bio || 'Passionate about sharing knowledge and helping others succeed.'}"</div>
+                                <button class="book-btn" onclick="openSlots(${m.Mentor_ID}, '${m.Fname} ${m.Lname}')">
+                                    View Available Slots →
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            });
+    }
+
+    // Load mentors on initial page load
+    loadMentors();
+
+    function openSlots(mentorId, mentorName) {
+        currentMentorId = mentorId;
+        document.getElementById('modalTitle').textContent = `Slots — ${mentorName}`;
+        document.getElementById('modalMsg').style.display = 'none';
+        document.getElementById('slotsList').innerHTML = '<p style="text-align:center;color:#aaa;padding:20px">Loading slots...</p>';
+        document.getElementById('modalOverlay').classList.add('open');
+
+        fetch(`/api/slots/${mentorId}`)
+            .then(r => r.json())
+            .then(slots => {
+                const list = document.getElementById('slotsList');
+                if (slots.length === 0) {
+                    list.innerHTML = '<p style="text-align:center;color:#aaa;padding:20px">No available slots right now.</p>';
+                    return;
+                }
+                list.innerHTML = '';
+                slots.forEach(s => {
+                    // Check if the slot is booked (1 means true in MySQL)
+                    let buttonHTML = '';
+                    let opacityStyle = '';
+
+                    if (s.Is_Booked === 1 || s.Is_Booked === true) {
+                        // Slot is taken: Make it look faded and show a disabled badge
+                        opacityStyle = 'opacity: 0.6; pointer-events: none;';
+                        buttonHTML = `
+                            <span style="padding: 8px 16px; border-radius: 8px; background: #e2e8f0; color: #718096; font-weight: 700; font-size: 12px;">
+                                ❌ Booked
+                            </span>
+                        `;
+                    } else {
+                        // Slot is free: Show the normal booking button
+                        buttonHTML = `
+                            <button class="slot-btn" onclick="bookSlot(${s.Slot_ID})">Book</button>
+                        `;
+                    }
+
+                    list.innerHTML += `
+                        <div class="slot-item" style="${opacityStyle}">
+                            <div>
+                                <div class="date">📅 ${new Date(s.Slot_Date).toLocaleDateString()}</div>
+                                <div class="time">🕐 ${s.Start_Time} — ${s.End_Time}</div>
+                            </div>
+                            ${buttonHTML}
+                        </div>
+                    `;
+                });
+            });
+    }
+
+   function bookSlot(slotId) {
+    const msgBox = document.getElementById('modalMsg');
+    
+    fetch('/api/book', {
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mentee_id: userId, slot_id: slotId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        msgBox.style.display = 'block';
+        
+        if (data.success) {
+            msgBox.textContent  = `✅ Booked! Your Booking ID is #${data.booking_id || ''}`;
+            msgBox.style.background = '#e8f5e9'; 
+            msgBox.style.color = '#2e7d32';
+            openSlots(currentMentorId, document.getElementById('modalTitle').textContent.replace('Slots — ', ''));
+        } else {
+            if (data.error && data.error.includes("Upgrade to Pro")) {
+                msgBox.innerHTML = `❌ ${data.error} <br><br> <a href="subscription.html" style="color: #c62828; text-decoration: underline; font-weight: bold;">Click here to view plans</a>`;
+            } else {
+                msgBox.textContent = `❌ ${data.error}`;
+            }
+            msgBox.style.background = '#ffebee'; 
+            msgBox.style.color = '#c62828';
+        }
+    })
+    .catch(error => {
+        console.error("Booking Error:", error);
+        msgBox.style.display = 'block';
+        msgBox.textContent = `❌ Something went wrong with the connection.`;
+        msgBox.style.background = '#ffebee'; 
+        msgBox.style.color = '#c62828';
+    });
+}
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    function loadMyBookings() {
+        fetch(`/api/my-bookings/${userId}`)
+            .then(r => r.json())
+            .then(bookings => {
+                const list = document.getElementById('myBookingsList');
+                if (bookings.length === 0) {
+                    list.innerHTML = '<p style="text-align:center;padding:40px;color:#aaa">No bookings yet. Browse mentors to get started!</p>';
+                    return;
+                }
+                list.innerHTML = '';
+                bookings.forEach(b => {
+                    let actionHTML = `<span class="badge ${b.Status}">${b.Status}</span>`;
+                
+                    if (b.Status === 'confirmed' && b.Meeting_Link) {
+                        const now = new Date();
+                        const dateString = b.Slot_Date.split('T')[0]; 
+                        const meetingStart = new Date(`${dateString}T${b.Start_Time}`);
+                        const meetingEnd = new Date(`${dateString}T${b.End_Time}`);
+                        const doorOpens = new Date(meetingStart.getTime() - (10 * 60 * 1000));
+
+                        if (now < doorOpens) {
+                            actionHTML += `<br><span style="font-size:11px; color:#f57f17; display:block; margin-top:8px; font-weight:bold;">
+                                              ⏳ Link unlocks 10 mins before start
+                                           </span>`;
+                        } else if (now > meetingEnd) {
+                            actionHTML += `<br><span style="font-size:11px; color:#aaa; display:block; margin-top:8px; text-decoration:line-through;">
+                                              Link Expired
+                                           </span>`;
+                        } else {
+                            actionHTML += `<br><a href="${b.Meeting_Link}" target="_blank" 
+                                              style="display:inline-block; margin-top:10px; padding:8px 16px; 
+                                              background:linear-gradient(135deg, #2e7d32, #43a047); 
+                                              color:white; border-radius:8px; text-decoration:none; 
+                                              font-size:12px; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                              📹 Join Meeting Now
+                                           </a>`;
+                        }
+                    } else if (b.Status === 'confirmed' && !b.Meeting_Link) {
+                        actionHTML += `<br><span style="font-size:11px; color:#aaa; display:block; margin-top:8px;">Awaiting link from mentor</span>`;
+                    }
+
+                    // --- RATINGS LOGIC ---
+                    if (b.Status === 'confirmed') {
+                        // Figure out exactly when this specific meeting ends
+                        const now = new Date();
+                        const dateString = b.Slot_Date.split('T')[0]; 
+                        const meetingEnd = new Date(`${dateString}T${b.End_Time}`);
+
+                        if (now > meetingEnd) {
+                            // 1. The meeting is officially over! Allow them to rate it.
+                            if (!b.Rating) {
+                                actionHTML += `<br><button onclick="submitReview(${b.Booking_ID})" 
+                                                  style="margin-top:10px; padding:6px 12px; background:white; color:#d81b60; 
+                                                  border:2px solid #fff0f6; border-radius:6px; font-weight:bold; cursor:pointer; font-size:11px;">
+                                                  ⭐ Rate Session
+                                               </button>`;
+                            } else {
+                                actionHTML += `<br><span style="font-size:11px; color:#d81b60; display:inline-block; margin-top:8px; font-weight:bold; background:#fff0f6; padding:4px 8px; border-radius:4px;">
+                                                  ⭐ You rated this ${b.Rating}/5
+                                               </span>`;
+                            }
+                        } else {
+                            // 2. The meeting is in the future. Lock the rating system!
+                            actionHTML += `<br><span style="font-size:11px; color:#aaa; display:inline-block; margin-top:8px; font-weight:bold; background:#f0f0f0; padding:4px 8px; border-radius:4px;">
+                                              ⭐ Rating unlocks after session ends
+                                           </span>`;
+                        }
+                    }
+
+                    list.innerHTML += `
+                        <div class="booking-card">
+                            <div class="booking-info">
+                                <h4>Session with ${b.Mentor_Name}</h4>
+                                <p>📅 ${new Date(b.Slot_Date).toLocaleDateString()} &nbsp;|&nbsp; 🕐 ${b.Start_Time} — ${b.End_Time}</p>
+                            </div>
+                            <div style="text-align:right;">
+                                ${actionHTML}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+    }
+
+    function submitReview(bookingId) {
+        const rating = prompt("⭐ Rate your session from 1 to 5 stars:");
+        const numRating = parseInt(rating);
+        
+        if (!numRating || numRating < 1 || numRating > 5) {
+            return alert("Review cancelled. Rating must be a number between 1 and 5!");
+        }
+
+        const comment = prompt("Leave a brief review for your mentor (optional):") || "";
+
+        fetch('/api/review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ booking_id: bookingId, rating: numRating, comment: comment })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Review submitted! Thank you for your feedback.");
+                loadMyBookings(); // Automatically refresh to hide the button and show the badge
+            } else {
+                alert("❌ Error: " + data.error);
+            }
+        });
+    }
+</script>
+</body>
+</html>

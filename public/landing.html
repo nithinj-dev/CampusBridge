@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusBridge — Find Your Mentor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9ff; color: #333; }
+
+        /* NAV */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 48px;
+            background: white;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #667eea, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-btn {
+            padding: 10px 28px; border-radius: 25px; text-decoration: none;
+            font-weight: 600; font-size: 14px; margin-left: 12px;
+        }
+        .btn-outline { border: 2px solid #667eea; color: #667eea; }
+        .btn-fill { background: linear-gradient(135deg, #667eea, #f093fb); color: white; }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #f093fb 50%, #f5576c 100%);
+            color: white; text-align: center;
+            padding: 100px 20px 80px;
+            clip-path: ellipse(100% 90% at 50% 10%);
+            padding-bottom: 120px;
+        }
+        .hero h1 { font-size: 52px; font-weight: 800; margin-bottom: 20px; line-height: 1.2; }
+        .hero p  { font-size: 20px; opacity: 0.92; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .hero-btns a {
+            padding: 16px 40px; border-radius: 30px; font-size: 16px;
+            font-weight: 700; text-decoration: none; transition: transform 0.2s;
+        }
+        .hero-btns a:hover { transform: translateY(-3px); }
+        .btn-white  { background: white; color: #667eea; }
+        .btn-ghost  { border: 2px solid white; color: white; }
+
+        /* STATS */
+        .stats {
+            display: flex; justify-content: center; gap: 48px;
+            flex-wrap: wrap; padding: 60px 20px;
+            background: white;
+        }
+        .stat { text-align: center; }
+        .stat h3 { font-size: 40px; font-weight: 800; background: linear-gradient(135deg, #667eea, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat p  { color: #888; margin-top: 4px; font-size: 15px; }
+
+        /* FEATURES */
+        .features { padding: 80px 48px; background: #f8f9ff; text-align: center; }
+        .features h2 { font-size: 36px; font-weight: 800; margin-bottom: 12px; }
+        .features .sub { color: #888; margin-bottom: 48px; font-size: 16px; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; max-width: 1000px; margin: 0 auto; }
+        .fcard {
+            background: white; border-radius: 20px; padding: 36px 28px;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.1);
+            transition: transform 0.2s;
+        }
+        .fcard:hover { transform: translateY(-6px); }
+        .fcard .icon { font-size: 40px; margin-bottom: 16px; }
+        .fcard h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+        .fcard p  { color: #888; font-size: 14px; line-height: 1.7; }
+
+        /* HOW IT WORKS */
+        .how { padding: 80px 48px; background: white; text-align: center; }
+        .how h2 { font-size: 36px; font-weight: 800; margin-bottom: 48px; }
+        .steps { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+        .step { max-width: 200px; }
+        .step .num {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            color: white; font-size: 22px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .step h4 { font-weight: 700; margin-bottom: 8px; }
+        .step p  { color: #888; font-size: 14px; line-height: 1.6; }
+
+        /* CTA */
+        .cta {
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            color: white; text-align: center; padding: 80px 20px;
+        }
+        .cta h2 { font-size: 36px; font-weight: 800; margin-bottom: 16px; }
+        .cta p  { font-size: 18px; opacity: 0.9; margin-bottom: 36px; }
+        .cta a  {
+            background: white; color: #667eea;
+            padding: 16px 48px; border-radius: 30px;
+            text-decoration: none; font-weight: 700; font-size: 16px;
+        }
+
+        footer { text-align: center; padding: 28px; color: #aaa; font-size: 13px; background: #f8f9ff; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">🎓 CampusBridge</div>
+    <div>
+        <a href="auth.html" class="nav-btn btn-outline">Log In</a>
+        <a href="auth.html" class="nav-btn btn-fill">Sign Up Free</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Bridge the Gap Between<br>You & Your Dream University</h1>
+    <p>Connect with real students from top universities worldwide. Get honest advice, book 1-on-1 sessions, and make your university journey easier.</p>
+    <div class="hero-btns">
+        <a href="subscription.html" class="nav-btn btn-fill">Upgrade to Pro 🚀</a>
+    </div>
+</div>
+
+<div class="stats">
+    <div class="stat"><h3 id="mentorCount">5</h3><p>Expert Mentors</p></div>
+    <div class="stat"><h3>5</h3><p>Top Universities</p></div>
+    <div class="stat"><h3 id="bookingCount">0</h3><p>Sessions Booked</p></div>
+    <div class="stat"><h3>10+</h3><p>Countries</p></div>
+</div>
+
+<div class="features">
+    <h2>Why Students Love CampusBridge</h2>
+    <p class="sub">Everything you need to navigate university admissions</p>
+    <div class="cards">
+        <div class="fcard">
+            <div class="icon">🌍</div>
+            <h3>Global Mentors</h3>
+            <p>Connect with students from universities across India, UK, Brazil, South Korea, Italy and more.</p>
+        </div>
+        <div class="fcard">
+            <div class="icon">📅</div>
+            <h3>Easy Scheduling</h3>
+            <p>Browse real-time availability and book sessions instantly. No back-and-forth emails needed.</p>
+        </div>
+        <div class="fcard">
+            <div class="icon">🔒</div>
+            <h3>Conflict-Free Booking</h3>
+            <p>Our smart booking system guarantees no double-bookings, ever. Your session is always secure.</p>
+        </div>
+        <div class="fcard">
+            <div class="icon">💬</div>
+            <h3>Real Peer Advice</h3>
+            <p>Get honest insights from students who've been through the process — not just admissions offices.</p>
+        </div>
+    </div>
+</div>
+
+<div class="how">
+    <h2>How It Works</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="num">1</div>
+            <h4>Create Account</h4>
+            <p>Sign up as a mentee looking for guidance or a mentor ready to help.</p>
+        </div>
+        <div class="step">
+            <div class="num">2</div>
+            <h4>Find a Mentor</h4>
+            <p>Browse mentors by university, degree, country and hourly rate.</p>
+        </div>
+        <div class="step">
+            <div class="num">3</div>
+            <h4>Book a Session</h4>
+            <p>Pick an available slot and confirm your booking in one click.</p>
+        </div>
+        <div class="step">
+            <div class="num">4</div>
+            <h4>Connect & Grow</h4>
+            <p>Meet via video call and get the advice you need to succeed.</p>
+        </div>
+    </div>
+</div>
+
+<div class="cta">
+    <h2>Ready to Find Your Mentor?</h2>
+    <p>Join hundreds of students already using CampusBridge</p>
+    <a href="auth.html">Create Free Account →</a>
+</div>
+
+<footer>© 2025 CampusBridge — Peer-to-Peer University Mentorship Platform</footer>
+
+<script>
+    fetch('/api/mentors').then(r => r.json()).then(d => {
+        document.getElementById('mentorCount').textContent = d.length;
+    });
+    fetch('/api/bookings').then(r => r.json()).then(d => {
+        document.getElementById('bookingCount').textContent = d.length;
+    });
+</script>
+</body>
+</html>
